@@ -4,13 +4,12 @@ from typing import Literal
 class Menu(BaseModel):
     id: int
     name: str
-    desc: str
-    category: Literal["Oleato™", "Hot Coffees", "Hot Drinks", "Hot Teas", "Iced Teas",
-                      "Frappuccino® Blended Beverages", "Cold Coffees", "Cold Drinks"]
+    description: str
+    category: str
     url_img: str
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "id": 2123736,
                 "name": "Cinnamon Caramel Cream Cold Brew",

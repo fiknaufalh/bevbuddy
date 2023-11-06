@@ -7,7 +7,7 @@ class Recommendation(BaseModel):
     mood: str
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "id_rec": 1,
                 "id_menu": 1,

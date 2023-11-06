@@ -9,7 +9,7 @@ class Nutrition(BaseModel):
     sugar: float
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "id_menu": 2123736,
                 "calories": 250,

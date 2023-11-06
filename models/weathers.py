@@ -11,7 +11,7 @@ class Weather(BaseModel):
     precipitation: float
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "id": 1,
                 "time": "2023-11-06T20:00",
