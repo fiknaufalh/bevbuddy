@@ -1,15 +1,26 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from routes.menus import menu_router
 from routes.nutritions import nutrition_router
 from routes.recommendations import recommendation_router
+from routes.users import user_router
 import uvicorn
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=[""],
+)
+
 app.include_router(menu_router)
 app.include_router(nutrition_router)
 app.include_router(recommendation_router)
+app.include_router(user_router)
 
 @app.get("/")
 def root():
