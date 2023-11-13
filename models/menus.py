@@ -11,7 +11,7 @@ class Menu(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "id": 2123736,
+                "id": 1,
                 "name": "Cinnamon Caramel Cream Cold Brew",
                 "description": "Starbucks® Cold Brew is sweetened with Cinnamon Caramel Syrup and topped with a cinnamon caramel cold foam and a dusting of cinnamon dolce topping for a special treat.",
                 "category": "Cold Coffees",

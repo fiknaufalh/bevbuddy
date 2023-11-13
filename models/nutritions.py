@@ -11,7 +11,7 @@ class Nutrition(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "id_menu": 2123736,
+                "id_menu": 1,
                 "calories": 250,
                 "protein": 2,
                 "fats": 12,
