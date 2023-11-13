@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Depends, status
+from utils.auth import JWTBearer, AuthHandler
 from models.menus import Menu
 from utils.database_manager import session
 from sqlalchemy import text
@@ -48,7 +49,7 @@ async def get_menu_by_id(id: int):
     return menus
 
 @menu_router.post('/menus')
-async def create_menu(menu: Menu):
+async def create_menu(menu: Menu, Authorize: JWTBearer = Depends(JWTBearer())):
     query = text(f"""INSERT INTO menu (id, name, description, category, url_img) 
                  VALUES ({menu.id}, '{menu.name}', '{menu.description}', '{menu.category}', '{menu.url_img}')""")
     session.execute(query)
@@ -56,7 +57,7 @@ async def create_menu(menu: Menu):
     return {"message": "Menu created successfully"}
 
 @menu_router.put('/menus/{id}')
-async def update_menu(id: int, menu: Menu):
+async def update_menu(id: int, menu: Menu, Authorize: JWTBearer = Depends(JWTBearer())):
     query = text(f"""UPDATE menu SET name = '{menu.name}', description = '{menu.description}', 
                  category = '{menu.category}', url_img = '{menu.url_img}' 
                  WHERE id = {id}""")
@@ -72,7 +73,7 @@ async def update_menu(id: int, menu: Menu):
     return {"message": "Menu updated successfully"}
 
 @menu_router.delete('/menus/{id}')
-async def delete_menu(id: int):
+async def delete_menu(id: int, Authorize: JWTBearer = Depends(JWTBearer())):
     query = text(f"DELETE FROM menu WHERE id = {id}")
     result = session.execute(query)
     session.commit()

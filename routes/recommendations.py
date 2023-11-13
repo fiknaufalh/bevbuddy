@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Depends, status
+from utils.auth import JWTBearer, AuthHandler
 from models.recommendations import RecommendationReq
 import utils.tdee_calculator as tdee
 from utils.database_manager import session
@@ -7,10 +8,20 @@ from sqlalchemy import text
 recommendation_router = APIRouter(tags=['Recommendation'])
 
 @recommendation_router.post('/recommendations')
-async def create_recommendation(req: RecommendationReq):
+async def create_recommendation(req: RecommendationReq, Authorize: JWTBearer = Depends(JWTBearer())):
 
-    calory_upper_bound = tdee.calculate_tdee(req.gender, req.age, req.weight, req.height, req.activity)
+    CALORY_PERCENTAGE = 0.4
+    PROTEIN_PERCENTAGE = 0.3
+    FAT_PERCENTAGE = 0.3
+    CARB_PERCENTAGE = 0.4
+
+    calory_upper_bound = CALORY_PERCENTAGE * tdee.calculate_tdee(
+        req.gender, req.age, req.weight, req.height, req.activity)
     protein_grams, fat_grams, carb_grams = tdee.calculate_macros(calory_upper_bound)
+
+    protein_grams *= PROTEIN_PERCENTAGE
+    fat_grams *= FAT_PERCENTAGE
+    carb_grams *= CARB_PERCENTAGE
 
     query = text(f"""SELECT * FROM menu JOIN nutrition ON menu.id = nutrition.id_menu
                  WHERE calories <= {calory_upper_bound} AND protein <= {protein_grams} 

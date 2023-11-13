@@ -13,8 +13,8 @@ class AuthHandler():
     pwd_context = CryptContext(schemes=["bcrypt"])
     secret = config["SECRET_KEY"]
     
-    def get_password_hash(self, passsword):
-        return self.pwd_context.hash(passsword)
+    def get_password_hash(self, password):
+        return self.pwd_context.hash(password)
     
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
@@ -43,8 +43,7 @@ class AuthHandler():
         
     def auth_wrapper(self, auth: HTTPAuthorizationCredentials = Security(security)):
         return self.decode_token(auth.credentials)
-        
-    
+
 
 class JWTBearer(HTTPBearer):
     authHandler = AuthHandler()
@@ -60,4 +59,3 @@ class JWTBearer(HTTPBearer):
             if decoded is not None:
                 return decoded
         raise HTTPException(status_code=403, detail='Invalid token')
-     

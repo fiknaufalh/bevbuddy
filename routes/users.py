@@ -18,7 +18,7 @@ def register(inputUser: UserRegisterModel):
         raise HTTPException(status_code=405, detail="Password harus memiliki minimal 6 karakter")
         return
     
-    hashed_password = AuthHandler().get_password_hash(passsword=inputUser.password)
+    hashed_password = AuthHandler().get_password_hash(password=inputUser.password)
 
     newUser = {"fullname": inputUser.fullname, "username": inputUser.username, "passkey": hashed_password}
 
@@ -34,7 +34,7 @@ def register(inputUser: UserRegisterModel):
 @user_router.post('/login')
 def login(inputUser: UserLoginSchema):
     users = session.execute(text("SELECT username, passkey, fullname FROM person WHERE username=:uname"), {"uname":inputUser.username})
-    hashed_password = AuthHandler().get_password_hash(passsword=inputUser.password)
+    hashed_password = AuthHandler().get_password_hash(password=inputUser.password)
     for user in users:
         if not AuthHandler().verify_password(plain_password=inputUser.password, hashed_password=user[1]):
             raise HTTPException(status_code=401, detail='Username atau password salah!')

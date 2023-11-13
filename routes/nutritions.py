@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Depends, status
+from utils.auth import JWTBearer, AuthHandler
 from models.nutritions import Nutrition
 from utils.database_manager import session
 from sqlalchemy import text
@@ -51,17 +52,30 @@ async def get_nutrition_by_id(id: int):
     return nutritions
 
 @nutrition_router.post('/nutritions')
-async def create_nutrition(nutrition: Nutrition):
-    query = text(f"""INSERT INTO nutrition (id_menu, calories, protein, fats, carbs, sugar) 
-                 VALUES ({nutrition.id_menu}, {nutrition.calories}, {nutrition.protein}, 
-                 {nutrition.fats}, {nutrition.carbs}, {nutrition.sugar})""")
-    session.execute(query)
-    session.commit()
+async def create_nutrition(nutrition: Nutrition, Authorize: JWTBearer = Depends(JWTBearer())):
+    
+    if not session.execute(text(f"SELECT * FROM menu WHERE id = {nutrition.id_menu}")).rowcount:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"Menu with id {nutrition.id_menu} not found"
+        )
+    
+    try:
+        query = text(f"""INSERT INTO nutrition (id_menu, calories, protein, fats, carbs, sugar) 
+                    VALUES ({nutrition.id_menu}, {nutrition.calories}, {nutrition.protein}, 
+                    {nutrition.fats}, {nutrition.carbs}, {nutrition.sugar})""")
+        session.execute(query)
+        session.commit()
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE, 
+            detail=f"Nutrition with id {nutrition.id_menu} already exists"
+        )
 
     return {"message": "Nutrition created successfully"}
 
 @nutrition_router.put('/nutritions/{id}')
-async def update_nutrition(id: int, nutrition: Nutrition):
+async def update_nutrition(id: int, nutrition: Nutrition, Authorize: JWTBearer = Depends(JWTBearer())):
     query = text(f"""UPDATE nutrition 
                  SET id_menu = {nutrition.id_menu}, calories = {nutrition.calories}, 
                  protein = {nutrition.protein}, fats = {nutrition.fats}, 
@@ -79,7 +93,7 @@ async def update_nutrition(id: int, nutrition: Nutrition):
     return {"message": "Nutrition updated successfully"}
 
 @nutrition_router.delete('/nutritions/{id}')
-async def delete_nutrition(id: int):
+async def delete_nutrition(id: int, Authorize: JWTBearer = Depends(JWTBearer())):
     query = text(f"DELETE FROM nutrition WHERE id_menu = {id}")
     result = session.execute(query)
     session.commit()
