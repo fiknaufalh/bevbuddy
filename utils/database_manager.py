@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker, scoped_session
 from dotenv import load_dotenv, dotenv_values
 
 load_dotenv()
@@ -17,3 +18,6 @@ db_sslmode = config['DB_SSLMODE']
 
 db_engine = f"mysql+pymysql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 dbInstance = DatabaseManager(db_engine)
+
+Session = sessionmaker(autoflush=False, bind=dbInstance.conn)
+session = Session()
