@@ -45,19 +45,3 @@ def login(inputUser: UserLoginSchema):
         return {'message': f'login berhasil! Selamat datang, {firstName}!',
                 'token': token}
     raise HTTPException(status_code=401, detail='Username tidak terdaftar!')
-
-@user_router.get('/users')
-async def get_all_users():
-    query = text("SELECT * FROM person")
-    result = session.execute(query)
-    
-    users = []
-    for row in result:
-        user_dict = {
-            "fullname": row.fullname,
-            "username": row.username,
-            "passkey": row.passkey
-        }
-        users.append(user_dict)
-    
-    return users
