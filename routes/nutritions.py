@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException, status
 from models.nutritions import Nutrition
-from utils.database_manager import dbInstance
+from utils.database_manager import session
 from sqlalchemy import text
 
 nutrition_router = APIRouter(tags=['Nutrition'])
 
 @nutrition_router.get('/nutritions')
 async def get_all_nutritions():
-    query = text("SELECT * FROM menu_nutrition")
-    result = dbInstance.conn.execute(query)
+    query = text("SELECT * FROM nutrition")
+    result = session.execute(query)
     
     nutritions = []
     for row in result:
@@ -27,8 +27,8 @@ async def get_all_nutritions():
 
 @nutrition_router.get('/nutritions/{id}')
 async def get_nutrition_by_id(id: int):
-    query = text(f"SELECT * FROM menu_nutrition WHERE id_menu = {id}")
-    result = dbInstance.conn.execute(query)
+    query = text(f"SELECT * FROM nutrition WHERE id_menu = {id}")
+    result = session.execute(query)
 
     if not result.rowcount:
         raise HTTPException(
@@ -52,20 +52,23 @@ async def get_nutrition_by_id(id: int):
 
 @nutrition_router.post('/nutritions')
 async def create_nutrition(nutrition: Nutrition):
-    query = text(f"""INSERT INTO menu_nutrition (id_menu, calories, protein, fats, carbs, sugar) 
+    query = text(f"""INSERT INTO nutrition (id_menu, calories, protein, fats, carbs, sugar) 
                  VALUES ({nutrition.id_menu}, {nutrition.calories}, {nutrition.protein}, 
                  {nutrition.fats}, {nutrition.carbs}, {nutrition.sugar})""")
-    dbInstance.conn.execute(query)
+    session.execute(query)
+    session.commit()
+
     return {"message": "Nutrition created successfully"}
 
 @nutrition_router.put('/nutritions/{id}')
 async def update_nutrition(id: int, nutrition: Nutrition):
-    query = text(f"""UPDATE menu_nutrition 
+    query = text(f"""UPDATE nutrition 
                  SET id_menu = {nutrition.id_menu}, calories = {nutrition.calories}, 
                  protein = {nutrition.protein}, fats = {nutrition.fats}, 
                  carbs = {nutrition.carbs}, sugar = {nutrition.sugar} 
                  WHERE id_menu = {id}""")
-    result = dbInstance.conn.execute(query)
+    result = session.execute(query)
+    session.commit()
 
     if not result.rowcount:
         raise HTTPException(
@@ -77,8 +80,9 @@ async def update_nutrition(id: int, nutrition: Nutrition):
 
 @nutrition_router.delete('/nutritions/{id}')
 async def delete_nutrition(id: int):
-    query = text(f"DELETE FROM menu_nutrition WHERE id_menu = {id}")
-    result = dbInstance.conn.execute(query)
+    query = text(f"DELETE FROM nutrition WHERE id_menu = {id}")
+    result = session.execute(query)
+    session.commit()
 
     if not result.rowcount:
         raise HTTPException(

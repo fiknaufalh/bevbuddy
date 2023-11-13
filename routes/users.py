@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi import FastAPI, Body
 from models.users import UserRegisterModel, UserLoginSchema, users
 from utils.auth import AuthHandler
-from utils.database_manager import dbInstance
+from utils.database_manager import session
 from sqlalchemy import text
 
 user_router = APIRouter(tags=["User"])
@@ -24,7 +24,8 @@ def register(inputUser: UserRegisterModel):
 
     query = text("INSERT INTO person (fullname, username, passkey) VALUES (:fullname, :username, :passkey)")
     try:
-        dbInstance.conn.execute(query, newUser)
+        session.execute(query, newUser)
+        session.commit()
         return {"message": "Akun Berhasil Didaftarkan!"}
     except:
         raise HTTPException(status_code=406, detail="Username sudah diambil, silakah pilih username lain!")
@@ -32,7 +33,7 @@ def register(inputUser: UserRegisterModel):
 
 @user_router.post('/login')
 def login(inputUser: UserLoginSchema):
-    users = dbInstance.conn.execute(text("SELECT username, passkey, fullname FROM person WHERE username=:uname"), {"uname":inputUser.username})
+    users = session.execute(text("SELECT username, passkey, fullname FROM person WHERE username=:uname"), {"uname":inputUser.username})
     hashed_password = AuthHandler().get_password_hash(passsword=inputUser.password)
     for user in users:
         if not AuthHandler().verify_password(plain_password=inputUser.password, hashed_password=user[1]):
@@ -48,7 +49,7 @@ def login(inputUser: UserLoginSchema):
 @user_router.get('/users')
 async def get_all_users():
     query = text("SELECT * FROM person")
-    result = dbInstance.conn.execute(query)
+    result = session.execute(query)
     
     users = []
     for row in result:

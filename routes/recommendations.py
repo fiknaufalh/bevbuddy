@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 from models.recommendations import RecommendationReq
 import utils.tdee_calculator as tdee
-from utils.database_manager import dbInstance
+from utils.database_manager import session
 from sqlalchemy import text
 
 recommendation_router = APIRouter(tags=['Recommendation'])
@@ -12,12 +12,13 @@ async def create_recommendation(req: RecommendationReq):
     calory_upper_bound = tdee.calculate_tdee(req.gender, req.age, req.weight, req.height, req.activity)
     protein_grams, fat_grams, carb_grams = tdee.calculate_macros(calory_upper_bound)
 
-    query = text(f"""SELECT * FROM menu JOIN menu_nutrition ON menu.id = menu_nutrition.id_menu
+    query = text(f"""SELECT * FROM menu JOIN nutrition ON menu.id = nutrition.id_menu
                  WHERE calories <= {calory_upper_bound} AND protein <= {protein_grams} 
                  AND fats <= {fat_grams} AND carbs <= {carb_grams} 
                  ORDER BY calories DESC LIMIT 3""")
 
-    result = dbInstance.conn.execute(query)
+    result = session.execute(query)
+    session.commit()
 
     if not result.rowcount:
         raise HTTPException(
