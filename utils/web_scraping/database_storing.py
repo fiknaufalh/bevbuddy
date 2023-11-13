@@ -51,4 +51,4 @@ def insert_data_to_mysql(json_file_path, config, table_name):
 
 if __name__ == "__main__":
     insert_data_to_mysql(r"utils/web_scraping/data/menu.json", config, "menu")
-    insert_data_to_mysql(r"utils/web_scraping/data/nutrition.json", config, "menu_nutrition")
+    insert_data_to_mysql(r"utils/web_scraping/data/nutrition.json", config, "nutrition")

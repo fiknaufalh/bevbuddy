@@ -2,3 +2,5 @@ __pycache__
 .env*
 .env.example
 DigiCertGlobalRootCA.crt.pem
+__init__.py
+```
