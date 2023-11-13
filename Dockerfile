@@ -1,13 +1,11 @@
 FROM python:3.10
 
-WORKDIR /app
+WORKDIR /code
 
-COPY . /app
+COPY ./requirements.txt /code/requirements.txt
 
-RUN python -m pip install --upgrade pip
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-RUN pip install -r requirements.txt
+COPY ./app /code/app
 
-EXPOSE 8000
-
-CMD ["python", "main.py"]
+CMD ["python3", "app/main.py"]
