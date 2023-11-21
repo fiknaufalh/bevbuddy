@@ -49,7 +49,7 @@ async def get_menu_by_id(id: int):
     return menus
 
 @menu_router.post('/menus')
-async def create_menu(menu: Menu, Authorize: JWTBearer = Depends(JWTBearer())):
+async def create_menu(menu: Menu, Authorize: JWTBearer = Depends(JWTBearer(roles=["admin"]))):
     query = text(f"""INSERT INTO menu (id, name, description, category, url_img) 
                  VALUES ({menu.id}, '{menu.name}', '{menu.description}', '{menu.category}', '{menu.url_img}')""")
     session.execute(query)
@@ -57,7 +57,7 @@ async def create_menu(menu: Menu, Authorize: JWTBearer = Depends(JWTBearer())):
     return {"message": "Menu created successfully"}
 
 @menu_router.put('/menus/{id}')
-async def update_menu(id: int, menu: Menu, Authorize: JWTBearer = Depends(JWTBearer())):
+async def update_menu(id: int, menu: Menu, Authorize: JWTBearer = Depends(JWTBearer(roles=["admin"]))):
     query = text(f"""UPDATE menu SET name = '{menu.name}', description = '{menu.description}', 
                  category = '{menu.category}', url_img = '{menu.url_img}' 
                  WHERE id = {id}""")
@@ -73,7 +73,7 @@ async def update_menu(id: int, menu: Menu, Authorize: JWTBearer = Depends(JWTBea
     return {"message": "Menu updated successfully"}
 
 @menu_router.delete('/menus/{id}')
-async def delete_menu(id: int, Authorize: JWTBearer = Depends(JWTBearer())):
+async def delete_menu(id: int, Authorize: JWTBearer = Depends(JWTBearer(roles=["admin"]))):
     query = text(f"DELETE FROM menu WHERE id = {id}")
     result = session.execute(query)
     session.commit()

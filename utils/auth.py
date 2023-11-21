@@ -19,11 +19,15 @@ class AuthHandler():
     def verify_password(self, plain_password, hashed_password):
         return self.pwd_context.verify(plain_password, hashed_password)
     
-    def encode_token(self,user_id):
+    def encode_token(self, user_id, username, fullname, email, role):
         payload = {
             'exp': datetime.utcnow() + timedelta(days=0, minutes=300),
             'iat': datetime.utcnow(),
-            'sub': user_id
+            'sub': user_id,
+            'role': role,
+            'username': username,
+            'fullname': fullname,
+            'email': email
         }
         
         return jwt.encode(
@@ -35,7 +39,7 @@ class AuthHandler():
     def decode_token(self, token):
         try:
             payload = jwt.decode(token,self.secret, algorithms=['HS256'])
-            return payload['sub']
+            return payload
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=402, detail='Token expired')
         except jwt.InvalidTokenError:
@@ -47,8 +51,9 @@ class AuthHandler():
 
 class JWTBearer(HTTPBearer):
     authHandler = AuthHandler()
-    def __init__(self, auto_error:  bool = True):
+    def __init__(self, auto_error:  bool = True, roles: list = None):
         super(JWTBearer,self).__init__(auto_error=auto_error)
+        self.roles = roles
 
     async def __call__(self, request: Request):
         credentials: HTTPAuthorizationCredentials = await super(JWTBearer,self).__call__(request)
@@ -57,5 +62,7 @@ class JWTBearer(HTTPBearer):
                 raise HTTPException(status_code=403, detail="Scheme Invalid")
             decoded = self.authHandler.decode_token(credentials.credentials)
             if decoded is not None:
+                if self.roles and decoded.get("role") not in self.roles:
+                    raise HTTPException(status_code=403, detail='Unauthorized: Invalid role')
                 return decoded
         raise HTTPException(status_code=403, detail='Invalid token')

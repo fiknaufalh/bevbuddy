@@ -1,28 +1,31 @@
 from fastapi import APIRouter, HTTPException, status
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi import FastAPI, Body
-from models.users import UserRegisterModel, UserLoginSchema, users
+from models.users import UserRegister, UserLogin
 from utils.auth import AuthHandler
 from utils.database_manager import session
 from sqlalchemy import text
 
 user_router = APIRouter(tags=["User"])
 
-@user_router.post('/register', status_code=201)
-def register(inputUser: UserRegisterModel):
-    if (len(inputUser.username) <= 3):
+@user_router.post('/register', status_code=status.HTTP_201_CREATED)
+def register(inputUser: UserRegister):
+    if (len(inputUser.username) < 4):
         raise HTTPException(status_code=405, detail="Username harus memiliki minilmal 4 karakter")
-        return
     
-    if (len(inputUser.password) <= 5):
+    if (len(inputUser.password) < 6):
         raise HTTPException(status_code=405, detail="Password harus memiliki minimal 6 karakter")
-        return
     
     hashed_password = AuthHandler().get_password_hash(password=inputUser.password)
 
-    newUser = {"fullname": inputUser.fullname, "username": inputUser.username, "passkey": hashed_password}
+    newUser = {
+        "username": inputUser.username, 
+        "fullname": inputUser.fullname,
+        "email": inputUser.email, 
+        "password": hashed_password,
+        "role": inputUser.role
+    }
 
-    query = text("INSERT INTO person (fullname, username, passkey) VALUES (:fullname, :username, :passkey)")
+    query = text("""INSERT INTO person (username, fullname, email, password, role) 
+                 VALUES (:username, :fullname, :email, :password, :role)""")
     try:
         session.execute(query, newUser)
         session.commit()
@@ -32,16 +35,24 @@ def register(inputUser: UserRegisterModel):
 
 
 @user_router.post('/login')
-def login(inputUser: UserLoginSchema):
-    users = session.execute(text("SELECT username, passkey, fullname FROM person WHERE username=:uname"), {"uname":inputUser.username})
-    hashed_password = AuthHandler().get_password_hash(password=inputUser.password)
+def login(inputUser: UserLogin):
+    users = session.execute(text("""SELECT id, username, fullname, email, password, role 
+                                 FROM person WHERE username=:uname"""), {"uname":inputUser.username})
+    
     for user in users:
-        if not AuthHandler().verify_password(plain_password=inputUser.password, hashed_password=user[1]):
+        if not AuthHandler().verify_password(plain_password=inputUser.password, hashed_password=user.password):
             raise HTTPException(status_code=401, detail='Username atau password salah!')
-            return
-        fullName = user[2]
+
+        fullName = user.fullname
         firstName = fullName.split()[0]
-        token = AuthHandler().encode_token(user.username)
-        return {'message': f'login berhasil! Selamat datang, {firstName}!',
-                'token': token}
+
+        token = AuthHandler().encode_token(
+            user_id=user.id, 
+            username=user.username, 
+            fullname=user.fullname, 
+            email=user.email, 
+            role=user.role
+        )
+
+        return {'message': f'login berhasil! Selamat datang, {firstName}!','token': token}
     raise HTTPException(status_code=401, detail='Username tidak terdaftar!')
