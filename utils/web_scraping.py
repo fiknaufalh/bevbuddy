@@ -53,8 +53,8 @@ def main():
             traceback.print_exc()
             continue
 
-    export_to_json(menu_table, r"/utils/web_scraping/data/menu.json")
-    export_to_json(nutrition_table, r"/utils/web_scraping/data/nutrition.json")
+    export_to_json(menu_table, r"/data/web_scraping/menu.json")
+    export_to_json(nutrition_table, r"/data/web_scraping/nutrition.json")
 
 
 def export_to_json(data, filename):
