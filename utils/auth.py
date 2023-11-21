@@ -1,5 +1,5 @@
 import jwt
-from fastapi import HTTPException, Security, Request
+from fastapi import HTTPException, Security, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
@@ -41,9 +41,9 @@ class AuthHandler():
             payload = jwt.decode(token,self.secret, algorithms=['HS256'])
             return payload
         except jwt.ExpiredSignatureError:
-            raise HTTPException(status_code=402, detail='Token expired')
+            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Token expired')
         except jwt.InvalidTokenError:
-            raise HTTPException(status_code=402, detail='Invalid token')
+            raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail='Invalid token')
         
     def auth_wrapper(self, auth: HTTPAuthorizationCredentials = Security(security)):
         return self.decode_token(auth.credentials)
@@ -59,10 +59,10 @@ class JWTBearer(HTTPBearer):
         credentials: HTTPAuthorizationCredentials = await super(JWTBearer,self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
-                raise HTTPException(status_code=403, detail="Scheme Invalid")
+                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Scheme Invalid")
             decoded = self.authHandler.decode_token(credentials.credentials)
             if decoded is not None:
                 if self.roles and decoded.get("role") not in self.roles:
-                    raise HTTPException(status_code=403, detail='Unauthorized: Invalid role')
+                    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Unauthorized: Invalid role')
                 return decoded
         raise HTTPException(status_code=403, detail='Invalid token')

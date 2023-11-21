@@ -6,6 +6,7 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str
     role: str
+    token: str = None
 
     class Config:
         schema_extra = {

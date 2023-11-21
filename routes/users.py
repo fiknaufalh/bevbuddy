@@ -3,16 +3,27 @@ from models.users import UserRegister, UserLogin
 from utils.auth import AuthHandler
 from utils.database_manager import session
 from sqlalchemy import text
+from dotenv import load_dotenv, dotenv_values
+
+load_dotenv()
+config = dotenv_values(".env")
 
 user_router = APIRouter(tags=["User"])
 
 @user_router.post('/register', status_code=status.HTTP_201_CREATED)
 def register(inputUser: UserRegister):
+
     if (len(inputUser.username) < 4):
-        raise HTTPException(status_code=405, detail="Username harus memiliki minilmal 4 karakter")
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, 
+                            detail="The username must have a minimum of 4 characters")
     
     if (len(inputUser.password) < 6):
-        raise HTTPException(status_code=405, detail="Password harus memiliki minimal 6 karakter")
+        raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, 
+                            detail="The password must have a minimum of 6 characters")
+    
+    admin_token = config['ADMIN_TOKEN']
+    if (inputUser.role == 'admin' and inputUser.token != admin_token):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Please enter admin token correctly!")
     
     hashed_password = AuthHandler().get_password_hash(password=inputUser.password)
 
@@ -29,9 +40,10 @@ def register(inputUser: UserRegister):
     try:
         session.execute(query, newUser)
         session.commit()
-        return {"message": "Akun Berhasil Didaftarkan!"}
+        return {"message": "Account registered successfully!"}
     except:
-        raise HTTPException(status_code=406, detail="Username sudah diambil, silakah pilih username lain!")
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, 
+                            detail="Username has been taken, please choose another username!")
 
 
 @user_router.post('/login')
@@ -41,7 +53,7 @@ def login(inputUser: UserLogin):
     
     for user in users:
         if not AuthHandler().verify_password(plain_password=inputUser.password, hashed_password=user.password):
-            raise HTTPException(status_code=401, detail='Username atau password salah!')
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Incorrect username or password!')
 
         fullName = user.fullname
         firstName = fullName.split()[0]
@@ -54,5 +66,5 @@ def login(inputUser: UserLogin):
             role=user.role
         )
 
-        return {'message': f'login berhasil! Selamat datang, {firstName}!','token': token}
-    raise HTTPException(status_code=401, detail='Username tidak terdaftar!')
+        return {'message': f'Login successful. Welcome, {firstName}!','token': token}
+    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Username not registered!')
