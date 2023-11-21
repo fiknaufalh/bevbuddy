@@ -16,14 +16,6 @@
 		"sugar": 19.0
 	},
 	{
-		"id_menu": 2123744,
-		"calories": 330.0,
-		"protein": 3.0,
-		"fats": 23.0,
-		"carbs": 30.0,
-		"sugar": 30.0
-	},
-	{
 		"id_menu": 2123743,
 		"calories": 250.0,
 		"protein": 2.0,
@@ -216,22 +208,6 @@
 		"sugar": 35.0
 	},
 	{
-		"id_menu": 2123591,
-		"calories": 180.0,
-		"protein": 3.0,
-		"fats": 6.0,
-		"carbs": 32.0,
-		"sugar": 32.0
-	},
-	{
-		"id_menu": 517,
-		"calories": 410.0,
-		"protein": 12.0,
-		"fats": 14.0,
-		"carbs": 61.0,
-		"sugar": 61.0
-	},
-	{
 		"id_menu": 873068661,
 		"calories": 330.0,
 		"protein": 12.0,
@@ -264,36 +240,12 @@
 		"sugar": 19.0
 	},
 	{
-		"id_menu": 414,
-		"calories": 340.0,
-		"protein": 12.0,
-		"fats": 14.0,
-		"carbs": 43.0,
-		"sugar": 43.0
-	},
-	{
 		"id_menu": 2122614,
 		"calories": 230.0,
 		"protein": 12.0,
 		"fats": 12.0,
 		"carbs": 19.0,
 		"sugar": 19.0
-	},
-	{
-		"id_menu": 2122617,
-		"calories": 380.0,
-		"protein": 13.0,
-		"fats": 18.0,
-		"carbs": 40.0,
-		"sugar": 40.0
-	},
-	{
-		"id_menu": 2122164,
-		"calories": 250.0,
-		"protein": 12.0,
-		"fats": 6.0,
-		"carbs": 37.0,
-		"sugar": 37.0
 	},
 	{
 		"id_menu": 2123563,
@@ -352,14 +304,6 @@
 		"sugar": 38.0
 	},
 	{
-		"id_menu": 420,
-		"calories": 430.0,
-		"protein": 15.0,
-		"fats": 18.0,
-		"carbs": 54.0,
-		"sugar": 54.0
-	},
-	{
 		"id_menu": 2123792,
 		"calories": 310.0,
 		"protein": 2.0,
@@ -392,28 +336,12 @@
 		"sugar": 0.0
 	},
 	{
-		"id_menu": 477,
-		"calories": 180.0,
-		"protein": 7.0,
-		"fats": 4.0,
-		"carbs": 29.0,
-		"sugar": 29.0
-	},
-	{
 		"id_menu": 446,
 		"calories": 0.0,
 		"protein": 0.0,
 		"fats": 0.0,
 		"carbs": 0.0,
 		"sugar": 0.0
-	},
-	{
-		"id_menu": 465,
-		"calories": 150.0,
-		"protein": 7.0,
-		"fats": 4.0,
-		"carbs": 21.0,
-		"sugar": 21.0
 	},
 	{
 		"id_menu": 873068751,
@@ -792,14 +720,6 @@
 		"sugar": 31.0
 	},
 	{
-		"id_menu": 2123745,
-		"calories": 380.0,
-		"protein": 2.0,
-		"fats": 34.0,
-		"carbs": 19.0,
-		"sugar": 19.0
-	},
-	{
 		"id_menu": 2123736,
 		"calories": 250.0,
 		"protein": 2.0,
@@ -888,14 +808,6 @@
 		"sugar": 4.0
 	},
 	{
-		"id_menu": 406,
-		"calories": 15.0,
-		"protein": 1.0,
-		"fats": 0.0,
-		"carbs": 2.0,
-		"sugar": 2.0
-	},
-	{
 		"id_menu": 422,
 		"calories": 80.0,
 		"protein": 0.0,
@@ -912,28 +824,12 @@
 		"sugar": 23.0
 	},
 	{
-		"id_menu": 410,
-		"calories": 10.0,
-		"protein": 1.0,
-		"fats": 0.0,
-		"carbs": 2.0,
-		"sugar": 2.0
-	},
-	{
 		"id_menu": 2123773,
 		"calories": 180.0,
 		"protein": 2.0,
 		"fats": 4.5,
 		"carbs": 34.0,
 		"sugar": 34.0
-	},
-	{
-		"id_menu": 2123743,
-		"calories": 250.0,
-		"protein": 2.0,
-		"fats": 17.0,
-		"carbs": 24.0,
-		"sugar": 24.0
 	},
 	{
 		"id_menu": 2123632,
@@ -968,22 +864,6 @@
 		"sugar": 13.0
 	},
 	{
-		"id_menu": 2123158,
-		"calories": 100.0,
-		"protein": 1.0,
-		"fats": 2.5,
-		"carbs": 20.0,
-		"sugar": 20.0
-	},
-	{
-		"id_menu": 417,
-		"calories": 300.0,
-		"protein": 9.0,
-		"fats": 16.0,
-		"carbs": 30.0,
-		"sugar": 30.0
-	},
-	{
 		"id_menu": 2123591,
 		"calories": 150.0,
 		"protein": 2.0,
@@ -1000,44 +880,12 @@
 		"sugar": 56.0
 	},
 	{
-		"id_menu": 873068661,
-		"calories": 320.0,
-		"protein": 8.0,
-		"fats": 16.0,
-		"carbs": 37.0,
-		"sugar": 37.0
-	},
-	{
-		"id_menu": 418,
-		"calories": 370.0,
-		"protein": 11.0,
-		"fats": 16.0,
-		"carbs": 47.0,
-		"sugar": 47.0
-	},
-	{
-		"id_menu": 2122614,
-		"calories": 210.0,
-		"protein": 11.0,
-		"fats": 11.0,
-		"carbs": 17.0,
-		"sugar": 17.0
-	},
-	{
 		"id_menu": 2122617,
 		"calories": 280.0,
 		"protein": 10.0,
 		"fats": 13.0,
 		"carbs": 30.0,
 		"sugar": 30.0
-	},
-	{
-		"id_menu": 407,
-		"calories": 130.0,
-		"protein": 8.0,
-		"fats": 4.5,
-		"carbs": 13.0,
-		"sugar": 13.0
 	},
 	{
 		"id_menu": 414,
@@ -1056,30 +904,6 @@
 		"sugar": 30.0
 	},
 	{
-		"id_menu": 2123563,
-		"calories": 310.0,
-		"protein": 3.0,
-		"fats": 9.0,
-		"carbs": 58.0,
-		"sugar": 58.0
-	},
-	{
-		"id_menu": 413,
-		"calories": 250.0,
-		"protein": 10.0,
-		"fats": 7.0,
-		"carbs": 37.0,
-		"sugar": 37.0
-	},
-	{
-		"id_menu": 496,
-		"calories": 420.0,
-		"protein": 9.0,
-		"fats": 17.0,
-		"carbs": 57.0,
-		"sugar": 57.0
-	},
-	{
 		"id_menu": 497,
 		"calories": 490.0,
 		"protein": 10.0,
@@ -1094,22 +918,6 @@
 		"fats": 20.0,
 		"carbs": 49.0,
 		"sugar": 49.0
-	},
-	{
-		"id_menu": 408,
-		"calories": 350.0,
-		"protein": 10.0,
-		"fats": 17.0,
-		"carbs": 38.0,
-		"sugar": 38.0
-	},
-	{
-		"id_menu": 2122615,
-		"calories": 260.0,
-		"protein": 10.0,
-		"fats": 10.0,
-		"carbs": 33.0,
-		"sugar": 33.0
 	},
 	{
 		"id_menu": 457,
@@ -1160,14 +968,6 @@
 		"sugar": 68.0
 	},
 	{
-		"id_menu": 466,
-		"calories": 240.0,
-		"protein": 7.0,
-		"fats": 4.0,
-		"carbs": 44.0,
-		"sugar": 44.0
-	},
-	{
 		"id_menu": 2123077,
 		"calories": 60.0,
 		"protein": 0.0,
@@ -1182,14 +982,6 @@
 		"fats": 0.0,
 		"carbs": 21.0,
 		"sugar": 21.0
-	},
-	{
-		"id_menu": 468,
-		"calories": 200.0,
-		"protein": 9.0,
-		"fats": 5.0,
-		"carbs": 29.0,
-		"sugar": 29.0
 	},
 	{
 		"id_menu": 459,
