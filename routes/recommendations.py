@@ -1,12 +1,12 @@
 from fastapi import APIRouter, HTTPException, Request, Depends, status
 from models.recommendations import RecommendationReq, MenuRes, NutritionRes
-from models.menus import Menu
-from models.nutritions import Nutrition
 from utils.auth import JWTBearer
 import utils.tdee_calculator as tdee
 from utils.weather_api import get_weather
+from utils.location_api import get_location
 from utils.database_manager import session
-from sqlalchemy import or_
+from sqlalchemy import or_, text
+from datetime import datetime
 
 recommendation_router = APIRouter(tags=['Recommendation'])
 
@@ -14,10 +14,11 @@ recommendation_router = APIRouter(tags=['Recommendation'])
 async def create_recommendation(
     req: RecommendationReq, 
     request: Request,
-    Authorize: JWTBearer = Depends(JWTBearer())):
+    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer"]))):
 
     client_ip = request.client.host if request.client.host != "127.0.0.1" else "182.253.194.14"
-    rec_time, temperature, precipitation, wind_speed = get_weather(client_ip)
+    latitude, longitude, rec_time = get_location(client_ip)
+    temperature, precipitation, wind_speed = get_weather(latitude, longitude)
 
     CALORY_PERCENTAGE = 0.4
     PROTEIN_PERCENTAGE = 0.7
@@ -44,7 +45,6 @@ async def create_recommendation(
 
     mood = req.mood if req.mood != None else "neutral"
     keywords = mood_keywords.get(mood.lower(), [])
-    # print(f"Keywords: {keywords}")
     mood_like_queries = [MenuRes.description.like(f"%{keyword}%") for keyword in keywords]
 
     weather = req.weather if req.weather != None else "no"
@@ -74,21 +74,49 @@ async def create_recommendation(
     max_rec = req.max_rec if req.max_rec > 0 else 0
     result = session.query(MenuRes, NutritionRes).join(MenuRes).filter(*filter_queries).limit(max_rec)
 
-    # print(f"Result: {result}")
-
-    # print(f"Calory upper bound: {calory_upper_bound}")
-    # print(f"Protein grams: {protein_grams}")
-    # print(f"Fat grams: {fat_grams}")
-    # print(f"Carb grams: {carb_grams}")
-
-    # result = session.execute(query)
-    session.commit()
-
     if not result.count():
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, 
             detail=f"Menu with given criteria not found"
         )
+
+    query = text(f"SELECT MAX(id_list) FROM menu_rec")
+    result_menu_rec = session.execute(query)
+    id_list = result_menu_rec.fetchone()[0]
+    id_list = 1 if id_list == None else id_list + 1
+
+    for menu_res, nutrition_res in result:
+        query = text(f"INSERT INTO menu_rec (id_list, id_menu) VALUES ({id_list}, {menu_res.id})")
+        session.execute(query)
+        session.commit()
+
+
+    query = text(f"""INSERT INTO weather (latitude, longitude, temperature, precipitation, wind_speed) 
+                 VALUES ({latitude}, {longitude}, {temperature}, {precipitation}, {wind_speed})""")
+    session.execute(query)
+    session.commit()
+
+    id_weather = session.execute(text("SELECT MAX(id) from weather")).fetchone()
+    id_weather = id_weather[0] if id_weather[0] != None else 1
+
+    rec_time = datetime.strptime(rec_time[:19], "%Y-%m-%d %H:%M:%S")
+
+    recommendation_data = {
+        "id_person": Authorize['sub'], 
+        "id_list": id_list,
+        "id_weather": id_weather,  
+        "rec_time": rec_time,
+        "mood": req.mood
+    }
+
+    query = text(f"""INSERT INTO recommendation (id_person, id_list, id_weather, rec_time, mood)
+                    VALUES ({recommendation_data['id_person']}, 
+                    {recommendation_data['id_list']}, 
+                    {recommendation_data['id_weather']}, 
+                    '{recommendation_data['rec_time']}', 
+                    '{recommendation_data['mood']}')""")
+    session.execute(query)
+    session.commit()
 
     rec = []
     for menu_res, nutrition_res in result:

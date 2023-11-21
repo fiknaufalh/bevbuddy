@@ -1,21 +1,25 @@
 from pydantic import BaseModel
 from typing import Literal
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import text, create_engine, Column, Integer, Float, String, Text
-from sqlalchemy import ForeignKey
+from sqlalchemy import Column, Integer, Float, String, Text, ForeignKey
+from datetime import datetime
 
 class Recommendation(BaseModel):
     id_rec: int
+    id_person: int
     id_menu: int
     id_weather: int
+    rec_date: datetime
     mood: str
 
     class Config:
         json_schema_extra = {
             "example": {
                 "id_rec": 1,
+                "id_person": 1,
                 "id_menu": 1,
                 "id_weather": 1,
+                "rec_date": "2021-01-01",
             }
         }
 

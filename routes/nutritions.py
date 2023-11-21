@@ -52,7 +52,7 @@ async def get_nutrition_by_id(id: int):
     return nutritions
 
 @nutrition_router.post('/nutritions')
-async def create_nutrition(nutrition: Nutrition, Authorize: JWTBearer = Depends(JWTBearer())):
+async def create_nutrition(nutrition: Nutrition, Authorize: JWTBearer = Depends(JWTBearer(roles=['admin']))):
     
     if not session.execute(text(f"SELECT * FROM menu WHERE id = {nutrition.id_menu}")).rowcount:
         raise HTTPException(
@@ -75,7 +75,7 @@ async def create_nutrition(nutrition: Nutrition, Authorize: JWTBearer = Depends(
     return {"message": "Nutrition created successfully"}
 
 @nutrition_router.put('/nutritions/{id}')
-async def update_nutrition(id: int, nutrition: Nutrition, Authorize: JWTBearer = Depends(JWTBearer())):
+async def update_nutrition(id: int, nutrition: Nutrition, Authorize: JWTBearer = Depends(JWTBearer(roles=['admin']))):
     query = text(f"""UPDATE nutrition 
                  SET id_menu = {nutrition.id_menu}, calories = {nutrition.calories}, 
                  protein = {nutrition.protein}, fats = {nutrition.fats}, 
@@ -93,7 +93,7 @@ async def update_nutrition(id: int, nutrition: Nutrition, Authorize: JWTBearer =
     return {"message": "Nutrition updated successfully"}
 
 @nutrition_router.delete('/nutritions/{id}')
-async def delete_nutrition(id: int, Authorize: JWTBearer = Depends(JWTBearer())):
+async def delete_nutrition(id: int, Authorize: JWTBearer = Depends(JWTBearer(roles=['admin']))):
     query = text(f"DELETE FROM nutrition WHERE id_menu = {id}")
     result = session.execute(query)
     session.commit()
