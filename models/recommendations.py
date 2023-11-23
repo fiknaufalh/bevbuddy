@@ -29,8 +29,8 @@ class RecommendationReq(BaseModel):
     weight: float
     height: float
     activity: Literal ["sedentary", "lightly_active", "moderately_active", "very_active", "extra_active"]
-    mood: Literal ["happy", "loved", "focus", "chill", "sad", "scared", "angry", "neutral"] | None = None
-    weather: Literal ["yes", "no"] | None = None,
+    mood: Literal ["happy", "loved", "focus", "chill", "sad", "scared", "angry", "neutral"] = None
+    weather: Literal ["yes", "no"] = None,
     max_rec: int = 5
 
     class Config:
