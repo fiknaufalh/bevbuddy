@@ -11,7 +11,7 @@ config = dotenv_values(".env")
 class AuthHandler():
     security = HTTPBearer()
     pwd_context = CryptContext(schemes=["bcrypt"])
-    secret = config["SECRET_KEY"]
+    secret = config['SECRET_KEY']
     
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
@@ -33,7 +33,7 @@ class AuthHandler():
         return jwt.encode(
             payload,
             self.secret,
-            algorithm=config["ALGORITHM"]
+            algorithm=config['ALGORITHM']
         )
         
     def decode_token(self, token):
