@@ -1,11 +1,21 @@
-FROM python:3.10
+FROM python:3.8-alpine
 
-WORKDIR /code
+WORKDIR /app
 
-COPY ./requirements.txt /code/requirements.txt
+COPY ./requirements.txt /app/requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN python -m pip install --upgrade pip
 
-COPY ./app /code/app
+RUN apk update && apk add python3-dev \
+                        gcc \
+                        libc-dev \
+                        libffi-dev 
 
-CMD ["python3", "app/main.py"]
+RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+
+COPY . /app/
+
+EXPOSE 8000
+
+CMD [ "python", "/app/main.py" ]
+
