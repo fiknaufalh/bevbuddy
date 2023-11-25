@@ -42,7 +42,9 @@ def register(inputUser: UserRegister):
         session.execute(query, newUser)
         session.commit()
         return {"message": "Account registered successfully!"}
-    except:
+    except Exception as e:
+        print(e)
+        session.rollback()
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, 
                             detail="Username has been taken, please choose another username!")
 

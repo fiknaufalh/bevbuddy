@@ -56,67 +56,75 @@ async def create_recommendation(
         if temperature > 25:
             weather_like_queries.append(MenuRes.category.like(f"%Hot%"))
 
-    mood_subquery = session.query(MenuRes.id).filter(or_(*mood_like_queries)).subquery()
-    weather_subquery = session.query(MenuRes.id).filter(or_(*weather_like_queries)).subquery()
+    try:
+        mood_subquery = session.query(MenuRes.id).filter(or_(*mood_like_queries)).subquery()
+        weather_subquery = session.query(MenuRes.id).filter(or_(*weather_like_queries)).subquery()
 
-    filter_queries = [
-        NutritionRes.calories <= calory_upper_bound,
-        NutritionRes.protein <= protein_grams,
-        NutritionRes.fats <= fat_grams,
-        NutritionRes.carbs <= carb_grams
-    ]
+        filter_queries = [
+            NutritionRes.calories <= calory_upper_bound,
+            NutritionRes.protein <= protein_grams,
+            NutritionRes.fats <= fat_grams,
+            NutritionRes.carbs <= carb_grams
+        ]
 
-    if weather.lower() == "yes":
-        result = filter_queries.append(MenuRes.id.not_in(weather_subquery))
-    if mood.lower() != "neutral":
-        result = filter_queries.append(MenuRes.id.in_(mood_subquery))
+        if weather.lower() == "yes":
+            result = filter_queries.append(MenuRes.id.not_in(weather_subquery))
+        if mood.lower() != "neutral":
+            result = filter_queries.append(MenuRes.id.in_(mood_subquery))
 
-    max_rec = req.max_rec if req.max_rec > 0 else 0
-    result = session.query(MenuRes, NutritionRes).join(MenuRes).filter(*filter_queries).limit(max_rec)
+        max_rec = req.max_rec if req.max_rec > 0 else 0
+        result = session.query(MenuRes, NutritionRes).join(MenuRes).filter(*filter_queries).limit(max_rec)
 
-    if not result.count():
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Menu with given criteria not found"
-        )
+        if not result.count():
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail=f"Menu with given criteria not found"
+            )
 
-    query = text(f"SELECT MAX(id_list) FROM menu_rec")
-    result_menu_rec = session.execute(query)
-    id_list = result_menu_rec.fetchone()[0]
-    id_list = 1 if id_list == None else id_list + 1
+        query = text(f"SELECT MAX(id_list) FROM menu_rec")
+        result_menu_rec = session.execute(query)
+        id_list = result_menu_rec.fetchone()[0]
+        id_list = 1 if id_list == None else id_list + 1
 
-    for menu_res, nutrition_res in result:
-        query = text(f"INSERT INTO menu_rec (id_list, id_menu) VALUES ({id_list}, {menu_res.id})")
+        for menu_res, nutrition_res in result:
+            query = text(f"INSERT INTO menu_rec (id_list, id_menu) VALUES ({id_list}, {menu_res.id})")
+            session.execute(query)
+            session.commit()
+
+
+        query = text(f"""INSERT INTO weather (latitude, longitude, temperature, precipitation, wind_speed) 
+                    VALUES ({latitude}, {longitude}, {temperature}, {precipitation}, {wind_speed})""")
         session.execute(query)
         session.commit()
 
+        id_weather = session.execute(text("SELECT MAX(id) from weather")).fetchone()
+        id_weather = id_weather[0] if id_weather[0] != None else 1
 
-    query = text(f"""INSERT INTO weather (latitude, longitude, temperature, precipitation, wind_speed) 
-                 VALUES ({latitude}, {longitude}, {temperature}, {precipitation}, {wind_speed})""")
-    session.execute(query)
-    session.commit()
+        rec_time = datetime.strptime(rec_time[:19], "%Y-%m-%d %H:%M:%S")
 
-    id_weather = session.execute(text("SELECT MAX(id) from weather")).fetchone()
-    id_weather = id_weather[0] if id_weather[0] != None else 1
+        recommendation_data = {
+            "id_person": Authorize['sub'], 
+            "id_list": id_list,
+            "id_weather": id_weather,  
+            "rec_time": rec_time,
+            "mood": req.mood
+        }
 
-    rec_time = datetime.strptime(rec_time[:19], "%Y-%m-%d %H:%M:%S")
-
-    recommendation_data = {
-        "id_person": Authorize['sub'], 
-        "id_list": id_list,
-        "id_weather": id_weather,  
-        "rec_time": rec_time,
-        "mood": req.mood
-    }
-
-    query = text(f"""INSERT INTO recommendation (id_person, id_list, id_weather, rec_time, mood)
-                    VALUES ({recommendation_data['id_person']}, 
-                    {recommendation_data['id_list']}, 
-                    {recommendation_data['id_weather']}, 
-                    '{recommendation_data['rec_time']}', 
-                    '{recommendation_data['mood']}')""")
-    session.execute(query)
-    session.commit()
+        query = text(f"""INSERT INTO recommendation (id_person, id_list, id_weather, rec_time, mood)
+                        VALUES ({recommendation_data['id_person']}, 
+                        {recommendation_data['id_list']}, 
+                        {recommendation_data['id_weather']}, 
+                        '{recommendation_data['rec_time']}', 
+                        '{recommendation_data['mood']}')""")
+        session.execute(query)
+        session.commit()
+    except Exception as e:
+            print(e)
+            session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail=f"Menu with given criteria not found"
+            )
 
     rec = []
     for menu_res, nutrition_res in result:
