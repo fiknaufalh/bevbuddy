@@ -18,7 +18,7 @@ def get_location(ip_address):
     except:
         lat = -6.1753924
         long = 106.8271528
-        rec_time = "2023-11-25 15:37"
+        rec_time = "2023-11-25 15:37:00"
         print("Use default location")
 
     return lat, long, rec_time
