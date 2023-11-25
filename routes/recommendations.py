@@ -14,7 +14,7 @@ recommendation_router = APIRouter(tags=['Recommendation'])
 async def create_recommendation(
     req: RecommendationReq, 
     request: Request,
-    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer"]))):
+    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer", "admin"]))):
 
     client_ip = request.client.host if request.client.host != "127.0.0.1" else "182.253.194.14"
     latitude, longitude, rec_time = get_location(client_ip)
