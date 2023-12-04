@@ -3,10 +3,7 @@ from models.users import UserRegister, UserLogin
 from utils.auth import AuthHandler
 from utils.database_manager import session
 from sqlalchemy import text
-from dotenv import load_dotenv, dotenv_values
-
-load_dotenv()
-config = dotenv_values(".env")
+from utils.config import settings
 
 user_router = APIRouter(tags=["User"])
 
@@ -21,8 +18,7 @@ def register(inputUser: UserRegister):
         raise HTTPException(status_code=status.HTTP_405_METHOD_NOT_ALLOWED, 
                             detail="The password must have a minimum of 6 characters")
     
-    admin_token = "pakbaskara"
-    # admin_token = config['ADMIN_TOKEN']
+    admin_token = settings.admin_token
     if (inputUser.role == 'admin' and inputUser.token != admin_token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Please enter admin token correctly!")
     

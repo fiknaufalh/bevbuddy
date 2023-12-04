@@ -1,16 +1,13 @@
 import json
 import mysql.connector
-from dotenv import load_dotenv, dotenv_values
-
-load_dotenv()
-config = dotenv_values(".env")
+from utils.config import settings
 
 config = {
-    'host': config['DB_HOST'],
-    'user': config['DB_USER'],
-    'password': config['DB_PASSWORD'],
-    'database': config['DB_NAME'],
-    'ssl_ca': config['DB_SSLMODE']  
+    'host': settings.db_hostname,
+    'user': settings.db_username,
+    'password': settings.db_password,
+    'database': settings.db_name,
+    'ssl_ca': settings.db_sslmode  
 }
 
 def insert_data_to_mysql(json_file_path, config, table_name):

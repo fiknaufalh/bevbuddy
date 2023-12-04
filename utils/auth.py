@@ -3,16 +3,12 @@ from fastapi import HTTPException, Security, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-from dotenv import load_dotenv, dotenv_values
-
-load_dotenv()
-config = dotenv_values(".env")
+from utils.config import settings
 
 class AuthHandler():
     security = HTTPBearer()
     pwd_context = CryptContext(schemes=["bcrypt"])
-    secret = "EstrellasDeQuatro"
-    # secret = config['SECRET_KEY']
+    secret = settings.secret_key
     
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
@@ -34,8 +30,7 @@ class AuthHandler():
         return jwt.encode(
             payload,
             self.secret,
-            algorithm="HS256"
-            # algorithm=config['ALGORITHM']
+            algorithm=settings.algorithm
         )
         
     def decode_token(self, token):
