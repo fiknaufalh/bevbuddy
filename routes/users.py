@@ -4,6 +4,7 @@ from utils.auth import AuthHandler
 from utils.database_manager import session
 from sqlalchemy import text
 from dotenv import load_dotenv, dotenv_values
+from utils.config import settings
 
 load_dotenv()
 config = dotenv_values(".env")
@@ -22,7 +23,8 @@ def register(inputUser: UserRegister):
                             detail="The password must have a minimum of 6 characters")
     
     # admin_token = "pakbaskara"
-    admin_token = config['ADMIN_TOKEN']
+    # admin_token = config['ADMIN_TOKEN']
+    admin_token = settings.admin_token
     if (inputUser.role == 'admin' and inputUser.token != admin_token):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Please enter admin token correctly!")
     
