@@ -1,7 +1,6 @@
 DigiCertGlobalRootCA.crt.pem
 __pycache__
 __init__.py
-.env-dev
-.env.example
+.env*
 log
 ```
