@@ -4,8 +4,8 @@ from dotenv import load_dotenv, dotenv_values
 load_dotenv()
 config = dotenv_values(".env")
 
-API_KEY = "59bbf7c444614eac8bd10ef556c02aa8"
-# API_KEY = config['API_KEY']
+# API_KEY = "59bbf7c444614eac8bd10ef556c02aa8"
+API_KEY = config['API_KEY']
 
 def get_location(ip_address):
     try:
