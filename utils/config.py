@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     admin_token: str
     api_key: str
 
+    # VCC API
+    vcc_api_url: str
+    vcc_username: str
+    vcc_password: str
+
     class Config:
         env_file = ".env"
 
