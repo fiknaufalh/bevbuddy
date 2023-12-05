@@ -5,7 +5,7 @@ class UserRegister(BaseModel):
     fullname: str
     email: EmailStr
     password: str
-    role: str
+    role: str = "customer"
     token: str = None
 
     class Config:

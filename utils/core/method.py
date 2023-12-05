@@ -7,9 +7,7 @@ def get_token():
         'username': settings.vcc_username,
         'password': settings.vcc_password
     }
-    print(data)
     response = requests.post(url, data=data)
-    print(response.json())
     return response.json()['access_token']
 
 def get_api_data(url: str):
