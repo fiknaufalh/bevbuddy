@@ -26,4 +26,9 @@ async def get_similar_movies(id: int, max_amount: int):
 
 @movie_router.post("/movies/recommendations/")
 async def create_movies_recommendations(mood: str, max_amount: int, Authorize: JWTBearer = Depends(JWTBearer(roles=["customer", "admin"]))):
-    return create_movies_recommendation(mood, max_amount)
+    title_rec = create_movies_recommendation(mood, max_amount)["recommendations"]
+    rec_list = []
+    for title in title_rec:
+        rec = get_movie_by_id(title["movie_id"])["results"]
+        rec_list.append(rec)
+    return rec_list
