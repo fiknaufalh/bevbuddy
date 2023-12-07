@@ -143,3 +143,47 @@ async def create_recommendation(
         rec.append(rec_dict)
 
     return rec
+
+@recommendation_router.get('/recommendations')
+async def get_recommendation_history(
+    request: Request,
+    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer", "admin"]))):
+
+    try:
+        user_id = Authorize['sub']
+        query = text(f"""
+                    SELECT menu.id, menu.name, menu.description, menu.category, menu.url_img, 
+                    recommendation.mood, recommendation.rec_time 
+                    FROM person JOIN recommendation JOIN menu_rec JOIN menu
+                    WHERE person.id = recommendation.id_person AND person.id = '{user_id}'
+                    AND recommendation.id_list = menu_rec.id_list AND menu_rec.id_menu = menu.id
+                    ORDER BY rec_time DESC;
+                    """)
+        result = session.execute(query)
+
+        if result.rowcount:
+            rec_list = []
+            for rec in result:
+                rec_dict = {
+                    "id_menu": rec.id,
+                    "name": rec.name,
+                    "description": rec.description,
+                    "category": rec.category,
+                    "url_img": rec.url_img,
+                    "mood": rec.mood,
+                    "rec_time": rec.rec_time
+                }
+                rec_list.append(rec_dict)
+            
+            return rec_list
+        else:
+            return {
+                "message": "You have not received any recommendation yet"
+            }
+    except Exception as e:
+        print(e)
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail=f"Something went wrong"
+        )
