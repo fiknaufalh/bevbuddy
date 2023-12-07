@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request, Depends, status
+from fastapi import APIRouter, HTTPException, Request, status, Depends, Query
 from models.recommendations import RecommendationReq, MenuRes, NutritionRes
 from utils.auth import JWTBearer
 import utils.tdee_calculator as tdee
@@ -8,7 +8,7 @@ from utils.database_manager import session
 from sqlalchemy import or_, text
 from datetime import datetime
 
-recommendation_router = APIRouter(tags=['Recommendation'])
+recommendation_router = APIRouter(tags=['Beverage Recommendations'])
 
 @recommendation_router.post('/recommendations')
 async def create_recommendation(
@@ -147,7 +147,15 @@ async def create_recommendation(
 @recommendation_router.get('/recommendations')
 async def get_recommendation_history(
     request: Request,
-    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer", "admin"]))):
+    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer", "admin"])),
+    mood: str = Query("all", enum=["happy", "loved", "focus", "chill", "sad", "scared", "angry", "neutral", "all"]),
+    start_date: datetime = None,
+    end_date: datetime = None):
+
+    if start_date == None:
+        start_date = datetime(2023, 1, 1)
+    if end_date == None:
+        end_date = datetime.now()
 
     try:
         user_id = Authorize['sub']
@@ -164,6 +172,10 @@ async def get_recommendation_history(
         if result.rowcount:
             rec_list = []
             for rec in result:
+                if mood != "all" and mood.lower() != rec.mood.lower():
+                    continue
+                if rec.rec_time < start_date or rec.rec_time > end_date:
+                    continue
                 rec_dict = {
                     "id_menu": rec.id,
                     "name": rec.name,
@@ -176,6 +188,69 @@ async def get_recommendation_history(
                 rec_list.append(rec_dict)
             
             return rec_list
+        else:
+            return {
+                "message": "You have not received any recommendation yet"
+            }
+    except Exception as e:
+        print(e)
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail=f"Something went wrong"
+        )
+    
+@recommendation_router.delete('/recommendations')
+async def delete_recommendation_history(
+    request: Request,
+    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer", "admin"])),
+    mood: str = Query("all", enum=["happy", "loved", "focus", "chill", "sad", "scared", "angry", "neutral", "all"]),
+    start_date: datetime = None,
+    end_date: datetime = None):
+
+    if start_date == None:
+        start_date = datetime(2023, 1, 1)
+    if end_date == None:
+        end_date = datetime.now()
+
+    try:
+        user_id = Authorize['sub']
+        query = text(f"""
+                    SELECT recommendation.id_rec, recommendation.id_list,
+                    recommendation.mood, recommendation.rec_time 
+                    FROM person JOIN recommendation JOIN menu_rec
+                    WHERE person.id = recommendation.id_person AND person.id = '{user_id}'
+                    AND recommendation.id_list = menu_rec.id_list ORDER BY rec_time DESC;
+                    """)
+        result = session.execute(query)
+
+        if result.rowcount:
+            rec_list = []
+            for rec in result:
+                if mood != "all" and mood.lower() != rec.mood.lower():
+                    continue
+                if rec.rec_time < start_date or rec.rec_time > end_date:
+                    continue
+                rec_dict = {
+                    "id_rec": rec.id_rec,
+                    "id_list": rec.id_list,
+                    "mood": rec.mood,
+                    "rec_time": rec.rec_time
+                }
+                rec_list.append(rec_dict)
+            
+            for rec in rec_list:
+                query = text(f"DELETE FROM menu_rec WHERE id_list = {rec['id_rec']}")
+                session.execute(query)
+                session.commit()
+
+                query = text(f"DELETE FROM recommendation WHERE id = {rec['id_rec']}")
+                session.execute(query)
+                session.commit()
+
+            return {
+                "message": "Recommendation history deleted"
+            }
         else:
             return {
                 "message": "You have not received any recommendation yet"

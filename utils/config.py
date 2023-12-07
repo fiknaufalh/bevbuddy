@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     vcc_username: str
     vcc_password: str
 
+    # MR API
+    mr_api_url: str
+    mr_username: str
+    mr_password: str
+
     class Config:
         env_file = ".env"
 

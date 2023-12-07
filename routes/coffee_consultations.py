@@ -5,11 +5,11 @@ from utils.virtual_coffee_consultation.scheduling_platform import *
 from utils.virtual_coffee_consultation.payment_processing import *
 from utils.virtual_coffee_consultation.video_conference import *
 from utils.virtual_coffee_consultation.users import *
-from utils.config import settings
 from utils.database_manager import session
+from datetime import datetime
 from sqlalchemy import text
 
-consultation_router = APIRouter(tags=['Consult'])
+consultation_router = APIRouter(tags=['Coffee Consultations'])
 
 @consultation_router.post("/consultations")
 async def create_consultation(
@@ -103,21 +103,31 @@ async def create_consultation(
 @consultation_router.get('/consultations')
 async def get_consultation_list(
     request: Request, 
-    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer", "admin"]))):
+    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer", "admin"])),
+    start_date: datetime = None,
+    end_date: datetime = None):
     
+    if start_date == None:
+        start_date = datetime(1970, 1, 1)
+    if end_date == None:
+        end_date = datetime(4000, 1, 1)
+
     try:
         consultee_id = Authorize['sub']
         consultee_fullname = Authorize['fullname']
         query = text(f"""
                      SELECT c.id, c.id_person, c.id_advisor, c.consultation_time, c.meeting_platform, c.meeting_link,
                     menu.id as menu_id, menu.name as name_menu, menu.description as menu_desc, menu.category as menu_cat, menu.url_img
-                    FROM consultation as c JOIN menu WHERE id_person = '{consultee_id}' AND menu.id = c.preferred_menu; 
+                    FROM consultation as c JOIN menu WHERE id_person = '{consultee_id}' AND menu.id = c.preferred_menu
+                    ORDER BY c.consultation_time;
                      """)
         result = session.execute(query)
 
         if result.rowcount:
             consult_list = []
             for consult in result:
+                if consult.consultation_time < start_date or consult.consultation_time > end_date:
+                    continue
                 consult_dict = {
                     "id_consult": consult.id,
                     "id_advisor": consult.id_advisor,
@@ -136,6 +146,48 @@ async def get_consultation_list(
                 consult_list.append(consult_dict)
             
             return consult_list
+        else:
+            return {
+                "message" : "You have not set consultation appointment yet"
+            }
+
+    except Exception as e:
+        print(e)
+        session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail=f"Something went wrong"
+        )
+    
+@consultation_router.delete("/consultations")
+async def delete_consultation_list(
+    request: Request,
+    Authorize: JWTBearer = Depends(JWTBearer(roles=["customer", "admin"])),
+    start_date: datetime = None,
+    end_date: datetime = None):
+
+    if start_date == None:
+        start_date = datetime(1970, 1, 1)
+    if end_date == None:
+        end_date = datetime(4000, 1, 1)
+
+    try:
+        consultee_id = Authorize['sub']
+        query = text(f"SELECT * FROM consultation WHERE id_person = '{consultee_id}';")
+        result = session.execute(query)
+
+        if result.rowcount:
+            for consult in result:
+                if consult.consultation_time < start_date or consult.consultation_time > end_date:
+                    continue
+                delete_video_conference(consult.id)
+                query = text(f"DELETE FROM consultation WHERE id = {consult.id};")
+                session.execute(query)
+                session.commit()
+            
+            return {
+                "message" : "Your consultation appointment has been deleted"
+            }
         else:
             return {
                 "message" : "You have not set consultation appointment yet"
