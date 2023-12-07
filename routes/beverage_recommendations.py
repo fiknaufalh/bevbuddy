@@ -20,10 +20,10 @@ async def create_recommendation(
     latitude, longitude, rec_time = get_location(client_ip)
     temperature, precipitation, wind_speed = get_weather(latitude, longitude)
 
-    CALORY_PERCENTAGE = 0.4
-    PROTEIN_PERCENTAGE = 0.7
-    FAT_PERCENTAGE = 0.7
-    CARB_PERCENTAGE = 0.7
+    CALORY_PERCENTAGE = 0.5
+    PROTEIN_PERCENTAGE = 0.8
+    FAT_PERCENTAGE = 0.8
+    CARB_PERCENTAGE = 0.8
 
     calory_upper_bound = CALORY_PERCENTAGE * tdee.calculate_tdee(
         req.gender, req.age, req.weight, req.height, req.activity)
@@ -50,10 +50,10 @@ async def create_recommendation(
     weather = req.weather if req.weather != None else "no"
     weather_like_queries = []
     if weather.lower() == "yes":
-        if precipitation > 0 or wind_speed > 10 or temperature < 5:
+        if precipitation > 0 or wind_speed > 10 or temperature < 20:
             weather_like_queries.append(MenuRes.category.like(f"%Cold%"))
             weather_like_queries.append(MenuRes.category.like(f"%Iced%"))
-        if temperature > 25:
+        if temperature >= 20:
             weather_like_queries.append(MenuRes.category.like(f"%Hot%"))
 
     try:
@@ -86,12 +86,6 @@ async def create_recommendation(
         id_list = result_menu_rec.fetchone()[0]
         id_list = 1 if id_list == None else id_list + 1
 
-        for menu_res, nutrition_res in result:
-            query = text(f"INSERT INTO menu_rec (id_list, id_menu) VALUES ({id_list}, {menu_res.id})")
-            session.execute(query)
-            session.commit()
-
-
         query = text(f"""INSERT INTO weather (latitude, longitude, temperature, precipitation, wind_speed) 
                     VALUES ({latitude}, {longitude}, {temperature}, {precipitation}, {wind_speed})""")
         session.execute(query)
@@ -118,6 +112,11 @@ async def create_recommendation(
                         '{recommendation_data['mood']}')""")
         session.execute(query)
         session.commit()
+
+        for menu_res, nutrition_res in result:
+            query = text(f"INSERT INTO menu_rec (id_list, id_menu) VALUES ({id_list}, {menu_res.id})")
+            session.execute(query)
+            session.commit()
     except Exception as e:
             print(e)
             session.rollback()
@@ -244,7 +243,7 @@ async def delete_recommendation_history(
                 session.execute(query)
                 session.commit()
 
-                query = text(f"DELETE FROM recommendation WHERE id = {rec['id_rec']}")
+                query = text(f"DELETE FROM recommendation WHERE id_rec = {rec['id_rec']}")
                 session.execute(query)
                 session.commit()
 

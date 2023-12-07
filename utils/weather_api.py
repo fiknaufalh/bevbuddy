@@ -15,4 +15,8 @@ def get_weather(lat, long):
         wind_speed = 5.8
         print("Use default weather")
 
+    print(f"Temperature: {temperature}")
+    print(f"Precipitation: {precipitation}")
+    print(f"Wind Speed: {wind_speed}")
+
     return temperature, precipitation, wind_speed
