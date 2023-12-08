@@ -81,9 +81,9 @@ async def create_recommendation(
                 detail=f"Menu with given criteria not found"
             )
 
-        query = text(f"SELECT MAX(id_list) FROM menu_rec")
-        result_menu_rec = session.execute(query)
-        id_list = result_menu_rec.fetchone()[0]
+        query = text(f"SELECT MAX(id_list) FROM recommendation")
+        result_recommendation_id_list = session.execute(query)
+        id_list = result_recommendation_id_list.fetchone()[0]
         id_list = 1 if id_list == None else id_list + 1
 
         query = text(f"""INSERT INTO weather (latitude, longitude, temperature, precipitation, wind_speed) 
